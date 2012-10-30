@@ -77,7 +77,7 @@ function step(timestamp) {
 	if(running == true) {
 		jsTime = Date.now() - prevTime - clTime - clMemTime - elapsedTime;
 		prevTime = Date.now();
-		console.innerHTML = "WebCL (ms): " + clTime + " WebCL memory transfer (ms): " + clMemTime + " JS (ms): " + jsTime;
+		console.innerHTML = "WebCL (ms): " + clTime + "<br>WebCL memory transfer (ms): " + clMemTime + "<br>JS (ms): " + jsTime;
 		clTime = 0;
 		jsTime = 0;
 		clMemTime = 0;
@@ -505,7 +505,7 @@ function updateRendering() {
 	var samples = currentSample - startSampleCount;
 	var sampleSec = samples * canvas.height * canvas.width / elapsedTime;
 	
-	console.innerHTML += " Rendering time " + elapsedTime + " ms (pass " + currentSample + ") Sample/sec " + sampleSec.toFixed(2) + "K\n";
+	console.innerHTML += "<br>Rendering time " + elapsedTime + " ms (pass " + currentSample + ")<br>Sample/sec " + sampleSec.toFixed(2) + "K\n";
 	
 	drawPixels();
 } 
