@@ -58,9 +58,9 @@ typedef struct {
 
 // NOTE: workaround for an Apple OpenCL compiler bug
 #ifdef __APPLE__
-#define OCL_CONSTANT_BUFFER __global
+#define OCL_CONSTANT_BUFFER global
 #else
-#define OCL_CONSTANT_BUFFER __constant
+#define OCL_CONSTANT_BUFFER constant
 #endif
 
 typedef struct {
@@ -91,7 +91,7 @@ typedef struct {
 } Sphere;
 
 
-static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
+float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 	*seed0 = 36969 * ((*seed0) & 65535) + ((*seed0) >> 16);
 	*seed1 = 18000 * ((*seed1) & 65535) + ((*seed1) >> 16);
 
@@ -107,7 +107,7 @@ static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 	return (res.f - 2.f) / 2.f;
 }
 
-static float SphereIntersect(
+float SphereIntersect(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -136,7 +136,7 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-static void UniformSampleSphere(const float u1, const float u2, Vec *v) {
+void UniformSampleSphere(const float u1, const float u2, Vec *v) {
 	const float zz = 1.f - 2.f * u1;
 	const float r = sqrt(max(0.f, 1.f - zz * zz));
 	const float phi = 2.f * FLOAT_PI * u2;
@@ -146,7 +146,7 @@ static void UniformSampleSphere(const float u1, const float u2, Vec *v) {
 	vinit(*v, xx, yy, zz);
 }
 
-static int Intersect(
+int Intersect(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -169,7 +169,7 @@ OCL_CONSTANT_BUFFER
 	return (*t < inf);
 }
 
-static int IntersectP(
+int IntersectP(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -187,7 +187,7 @@ OCL_CONSTANT_BUFFER
 	return 0;
 }
 
-static void SampleLights(
+void SampleLights(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -242,7 +242,7 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-static void RadiancePathTracing(
+void RadiancePathTracing(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -415,7 +415,7 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-static void RadianceDirectLighting(
+void RadianceDirectLighting(
 #ifdef GPU_KERNEL
 OCL_CONSTANT_BUFFER
 #endif
@@ -560,7 +560,7 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-static void GenerateCameraRay(OCL_CONSTANT_BUFFER Camera *camera,
+void GenerateCameraRay(OCL_CONSTANT_BUFFER Camera *camera,
 		unsigned int *seed0, unsigned int *seed1,
 		const int width, const int height, const int x, const int y, Ray *ray) {
 	const float invWidth = 1.f / width;
@@ -584,13 +584,13 @@ static void GenerateCameraRay(OCL_CONSTANT_BUFFER Camera *camera,
 	rinit(*ray, rorig, rdir);
 }
 
-__kernel void RadianceGPU(
-    __global Vec *colors, __global unsigned int *seedsInput,
+kernel void RadianceGPU(
+    global Vec *colors, global unsigned int *seedsInput,
 	OCL_CONSTANT_BUFFER Sphere *sphere, OCL_CONSTANT_BUFFER Camera *camera,
 	const unsigned int sphereCount,
 	const int width, const int height,
 	const int currentSample,
-	__global int *pixels) {
+	global int *pixels) {
     const int gid = get_global_id(0);
 	const int gid2 = 2 * gid;
 	const int x = gid % width;
