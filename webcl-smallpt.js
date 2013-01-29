@@ -430,7 +430,7 @@ function setupWebCL() {
 		clSrc = document.getElementById("clSmallptGPU").text;
 		clProgram = cl.createProgramWithSource(clSrc);
 
-		clProgram.buildProgram([devices[0]], "");
+		clProgram.buildProgram([devices[0]], "-cl-fast-relaxed-math");
 	} catch(e) {
 		alert("Failed to build WebCL program. Error " + clProgram.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_STATUS) + ":  " + clProgram.getProgramBuildInfo(devices[selected], WebCL.CL_PROGRAM_BUILD_LOG));
 	}
