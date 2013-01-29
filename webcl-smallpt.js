@@ -453,6 +453,9 @@ function setupWebCL() {
     //document.getElementById("clSmallptGPU").text;
 		clProgram = cl.createProgramWithSource(clSrc);
 		clProgram.buildProgram([selectedDevice], "-cl-fast-relaxed-math");
+    var buildLog = clProgram.getProgramBuildInfo(selectedDevice, WebCL.CL_PROGRAM_BUILD_LOG);
+    console.log("Kernel build log: ");
+    console.log(buildLog);
 	} catch(e) {
 		alert("Failed to build WebCL program. Error " + 
           clProgram.getProgramBuildInfo(selectedDevice, WebCL.CL_PROGRAM_BUILD_STATUS) + ":  " + 
