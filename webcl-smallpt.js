@@ -452,7 +452,7 @@ function setupWebCL() {
 		clSrc = xhrLoad("rendering_kernel.cl");
     //document.getElementById("clSmallptGPU").text;
 		clProgram = cl.createProgramWithSource(clSrc);
-		clProgram.buildProgram([selectedDevice], "-cl-fast-relaxed-math");
+		clProgram.buildProgram([selectedDevice], "-cl-fast-relaxed-math -cl-denorms-are-zero");
     var buildLog = clProgram.getProgramBuildInfo(selectedDevice, WebCL.CL_PROGRAM_BUILD_LOG);
     console.log("Kernel build log: ");
     console.log(buildLog);
