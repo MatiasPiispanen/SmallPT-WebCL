@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2009 David Bucciarelli (davibu@interfree.it)
+  Copyright (c) 2009 David Bucciarelli (davibu@interfree.it)
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #define GPU_KERNEL
@@ -89,7 +89,8 @@ typedef struct {
 } Sphere;
 
 
-float GetRandom(unsigned int *seed0, unsigned int *seed1) {
+float GetRandom(unsigned int *seed0, unsigned int *seed1) 
+{
 	*seed0 = 36969 * ((*seed0) & 65535) + ((*seed0) >> 16);
 	*seed1 = 18000 * ((*seed1) & 65535) + ((*seed1) >> 16);
 
@@ -105,12 +106,9 @@ float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 	return (res.f - 2.f) / 2.f;
 }
 
-float SphereIntersect(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *s,
-	const Ray *r) { /* returns distance, 0 if nohit */
+/* returns distance, 0 if nohit */
+float SphereIntersect(OCL_CONSTANT_BUFFER Sphere *s, const Ray *r) 
+{
 	Vec op; /* Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0 */
 	vsub(op, s->p, r->o);
 
@@ -134,7 +132,8 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-void UniformSampleSphere(const float u1, const float u2, Vec *v) {
+void UniformSampleSphere(const float u1, const float u2, Vec *v) 
+{
 	const float zz = 1.f - 2.f * u1;
 	const float r = sqrt(max(0.f, 1.f - zz * zz));
 	const float phi = 2.f * FLOAT_PI * u2;
@@ -144,15 +143,12 @@ void UniformSampleSphere(const float u1, const float u2, Vec *v) {
 	vinit(*v, xx, yy, zz);
 }
 
-int Intersect(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *spheres,
-	const unsigned int sphereCount,
-	const Ray *r,
-	float *t,
-	unsigned int *id) {
+int Intersect(OCL_CONSTANT_BUFFER Sphere *spheres,
+              const unsigned int sphereCount,
+              const Ray *r,
+              float *t,
+              unsigned int *id)
+{
 	float inf = (*t) = 1e20f;
 
 	unsigned int i = sphereCount;
@@ -167,14 +163,11 @@ OCL_CONSTANT_BUFFER
 	return (*t < inf);
 }
 
-int IntersectP(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *spheres,
-	const unsigned int sphereCount,
-	const Ray *r,
-	const float maxt) {
+int IntersectP(OCL_CONSTANT_BUFFER Sphere *spheres,
+               const unsigned int sphereCount,
+               const Ray *r,
+               const float maxt)
+{
 	unsigned int i = sphereCount;
 	for (; i--;) {
 		const float d = SphereIntersect(&spheres[i], r);
@@ -185,25 +178,21 @@ OCL_CONSTANT_BUFFER
 	return 0;
 }
 
-void SampleLights(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *spheres,
-	const unsigned int sphereCount,
-	unsigned int *seed0, unsigned int *seed1,
-	const Vec *hitPoint,
-	const Vec *normal,
-	Vec *result) {
+void SampleLights(OCL_CONSTANT_BUFFER	Sphere *spheres,
+                  const unsigned int sphereCount,
+                  unsigned int *seed0,
+                  unsigned int *seed1,
+                  const Vec *hitPoint,
+                  const Vec *normal,
+                  Vec *result)
+{
 	vclr(*result);
 
 	/* For each light */
 	unsigned int i;
 	for (i = 0; i < sphereCount; i++) {
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-		const Sphere *light = &spheres[i];
+
+    OCL_CONSTANT_BUFFER	Sphere *light = &spheres[i];
 		if (!viszero(light->e)) {
 			/* It is a light source */
 			Ray shadowRay;
@@ -240,15 +229,13 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-void RadiancePathTracing(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *spheres,
-	const unsigned int sphereCount,
-	const Ray *startRay,
-	unsigned int *seed0, unsigned int *seed1,
-	Vec *result) {
+void RadiancePathTracing(OCL_CONSTANT_BUFFER	Sphere *spheres,
+                         const unsigned int sphereCount,
+                         const Ray *startRay,
+                         unsigned int *seed0,
+                         unsigned int *seed1,
+                         Vec *result)
+{
 	Ray currentRay; rassign(currentRay, *startRay);
 	Vec rad; vinit(rad, 0.f, 0.f, 0.f);
 	Vec throughput; vinit(throughput, 1.f, 1.f, 1.f);
@@ -269,10 +256,7 @@ OCL_CONSTANT_BUFFER
 			return;
 		}
 
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-		const Sphere *obj = &spheres[id]; /* the hit object */
+    OCL_CONSTANT_BUFFER Sphere *obj = &spheres[id]; /* the hit object */
 
 		Vec hitPoint;
 		vsmul(hitPoint, t, currentRay.d);
@@ -413,15 +397,13 @@ OCL_CONSTANT_BUFFER
 	}
 }
 
-void RadianceDirectLighting(
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-	const Sphere *spheres,
-	const unsigned int sphereCount,
-	const Ray *startRay,
-	unsigned int *seed0, unsigned int *seed1,
-	Vec *result) {
+void RadianceDirectLighting(OCL_CONSTANT_BUFFER Sphere *spheres,
+                            const unsigned int sphereCount,
+                            const Ray *startRay,
+                            unsigned int *seed0,
+                            unsigned int *seed1,
+                            Vec *result) 
+{
 	Ray currentRay; rassign(currentRay, *startRay);
 	Vec rad; vinit(rad, 0.f, 0.f, 0.f);
 	Vec throughput; vinit(throughput, 1.f, 1.f, 1.f);
@@ -442,10 +424,7 @@ OCL_CONSTANT_BUFFER
 			return;
 		}
 
-#ifdef GPU_KERNEL
-OCL_CONSTANT_BUFFER
-#endif
-		const Sphere *obj = &spheres[id]; /* the hit object */
+    OCL_CONSTANT_BUFFER Sphere *obj = &spheres[id]; /* the hit object */
 
 		Vec hitPoint;
 		vsmul(hitPoint, t, currentRay.d);
@@ -559,8 +538,9 @@ OCL_CONSTANT_BUFFER
 }
 
 void GenerateCameraRay(OCL_CONSTANT_BUFFER Camera *camera,
-		unsigned int *seed0, unsigned int *seed1,
-		const int width, const int height, const int x, const int y, Ray *ray) {
+                       unsigned int *seed0, unsigned int *seed1,
+                       const int width, const int height, const int x, const int y, Ray *ray)
+{
 	const float invWidth = 1.f / width;
 	const float invHeight = 1.f / height;
 	const float r1 = GetRandom(seed0, seed1) - .5f;
@@ -570,26 +550,29 @@ void GenerateCameraRay(OCL_CONSTANT_BUFFER Camera *camera,
 
 	Vec rdir;
 	vinit(rdir,
-			camera->x.x * kcx + camera->y.x * kcy + camera->dir.x,
-			camera->x.y * kcx + camera->y.y * kcy + camera->dir.y,
-			camera->x.z * kcx + camera->y.z * kcy + camera->dir.z);
+        camera->x.x * kcx + camera->y.x * kcy + camera->dir.x,
+        camera->x.y * kcx + camera->y.y * kcy + camera->dir.y,
+        camera->x.z * kcx + camera->y.z * kcy + camera->dir.z);
 
 	Vec rorig;
 	vsmul(rorig, 0.1f, rdir);
 	vadd(rorig, rorig, camera->orig)
 
-	vnorm(rdir);
+  vnorm(rdir);
 	rinit(*ray, rorig, rdir);
 }
 
-kernel void RadianceGPU(
-    global Vec *colors, global unsigned int *seedsInput,
-	OCL_CONSTANT_BUFFER Sphere *sphere, OCL_CONSTANT_BUFFER Camera *camera,
-	const unsigned int sphereCount,
-	const int width, const int height,
-	const int currentSample,
-	global int *pixels) {
-    const int gid = get_global_id(0);
+kernel void RadianceGPU(global Vec *colors,
+                        global unsigned int *seedsInput,
+                        OCL_CONSTANT_BUFFER Sphere *sphere,
+                        OCL_CONSTANT_BUFFER Camera *camera,
+                        const unsigned int sphereCount,
+                        const int width, 
+                        const int height,
+                        const int currentSample,
+                        global int *pixels)
+{
+  const int gid = get_global_id(0);
 	const int gid2 = 2 * gid;
 	const int x = gid % width;
 	const int y = gid / width;
