@@ -23,8 +23,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define GPU_KERNEL
 
-#include "camera.h"
-
 typedef struct {
 	float x, y, z; // position, also color (r,g,b)
 } Vec;
@@ -622,9 +620,11 @@ kernel void RadianceGPU(
 		colors[i].z = (colors[i].z * k1  + r.z) * k2;
 	}
 
-	pixels[y * width + x] = toInt(colors[i].x) |
-			(toInt(colors[i].y) << 8) |
-			(toInt(colors[i].z) << 16);
+	pixels[y * width + x] = 
+    toInt(colors[i].x) |
+    (toInt(colors[i].y) << 8) |
+    (toInt(colors[i].z) << 16) |
+    (255 << 24);
 
 	seedsInput[gid2] = seed0;
 	seedsInput[gid2 + 1] = seed1;

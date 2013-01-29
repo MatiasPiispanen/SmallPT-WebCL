@@ -44,27 +44,39 @@ var prevTime = 0;
 
 var running = true;
 
+function xhrLoad(uri) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", uri, false);
+  xhr.send(null);
+  if (xhr.status == 200) {
+    //console.log(xhr.responseText);
+    return xhr.responseText;
+  } else {
+    console.log("XMLHttpRequest error!");
+    return null;
+  }
+};
+
 requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||  
-                            window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;  
-      
+  window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;  
+
 var start = window.mozAnimationStartTime;  // Only supported in FF. Other browsers can use something like Date.now(). 
 
 function webclsmallpt() {
 	htmlConsole = document.getElementById("console");
 	canvas = document.getElementById("canvas");
-    canvasContext = canvas.getContext("2d");
-    
-    scene = new Scene();
-    spheres = scene.getBuffer();
-	camera = new Camera();var clUtil;
-
+  canvasContext = canvas.getContext("2d");
+  
+  scene = new Scene();
+  spheres = scene.getBuffer();
+	camera = new Camera();
 	
 	camera.orig.set([50.0, 45.0, 205.6]);
 	camera.target.set([50.0, 45.0 - 0.042612, 204.6]);
 	
 	updateCamera();
-    
-    setupWebCL();
+  
+  setupWebCL();
 	canvasContent = canvasContext.createImageData(canvas.width, canvas.height);
 	
 	updateRendering();
@@ -72,7 +84,7 @@ function webclsmallpt() {
 	prevTime = Date.now();
 	requestAnimationFrame(step, canvas);  
 } 
-      
+
 function step(timestamp) {  
 	if(running == true) {
 		jsTime = Date.now() - prevTime - clTime - clMemTime - elapsedTime;
@@ -194,130 +206,130 @@ function keyFunc(event) {
 	var pgdown = 34;
 	
 	switch(key) {
-		case up:
-			var t = vec3.create(camera.target);
-			vec3.subtract(t, camera.orig, t);
-			t[1] = t[1] * Math.cos(-ROTATE_STEP) + t[2] * Math.sin(-ROTATE_STEP);
-			t[2] = -t[1] * Math.sin(-ROTATE_STEP) + t[2] * Math.cos(-ROTATE_STEP);
-			vec3.add(t, camera.orig, t);
-			camera.target = t;
-			reInit();
-			break;
-		case down:
-			var t = vec3.create(camera.target);
-			vec3.subtract(t, camera.orig, t);
-			t[1] = t[1] * Math.cos(ROTATE_STEP) + t[2] * Math.sin(ROTATE_STEP);
-			t[2] = -t[1] * Math.sin(ROTATE_STEP) + t[2] * Math.cos(ROTATE_STEP);
-			vec3.add(t, camera.orig, t);
-			camera.target = t;
-			reInit();
-			break;
-		case left: 
-			var t = vec3.create(camera.target);
-			vec3.subtract(t, camera.orig, t);
-			t[0] = t[0] * Math.cos(-ROTATE_STEP) - t[2] * Math.sin(-ROTATE_STEP);
-			t[2] = t[0] * Math.sin(-ROTATE_STEP) + t[2] * Math.cos(-ROTATE_STEP);
-			vec3.add(t, camera.orig, t);
-			camera.target = t;
-			reInit();
-			break;
-		case right: 
-			var t = vec3.create(camera.target);
-			vec3.subtract(t, camera.orig, t);
-			t[0] = t[0] * Math.cos(ROTATE_STEP) - t[2] * Math.sin(ROTATE_STEP);
-			t[2] = t[0] * Math.sin(ROTATE_STEP) + t[2] * Math.cos(ROTATE_STEP);
-			vec3.add(t, camera.orig, t);
-			camera.target = t;
-			reInit();
-			break;
-		case pgup:
-			camera.target[1] += MOVE_STEP;
-			reInit();
-			break;
-		case pgdown:
-			camera.target[1] -= MOVE_STEP;
-			reInit();
-			break;
-		case w:
-			var dir = vec3.create(camera.dir);
-			vec3.scale(dir, MOVE_STEP);
-			vec3.add(camera.orig, dir, camera.orig);
-			vec3.add(camera.target, dir, camera.target);
-			reInit();
-			break;
-		case a:
-			var dir = vec3.create(camera.x);
-			vec3.normalize(dir);
-			vec3.scale(dir, -MOVE_STEP);
-			vec3.add(camera.orig, dir, camera.orig);
-			vec3.add(camera.target, dir, camera.target);
-			reInit();
-			break;
-		case s:
-			var dir = vec3.create(camera.dir);
-			vec3.scale(dir, -MOVE_STEP);
-			vec3.add(camera.orig, dir, camera.orig);
-			vec3.add(camera.target, dir, camera.target);
-			reInit();
-			break;;
-		case d:
-			var dir = vec3.create(camera.x);
-			vec3.normalize(dir);
-			vec3.scale(dir, MOVE_STEP);
-			vec3.add(camera.orig, dir, camera.orig);
-			vec3.add(camera.target, dir, camera.target);
-			reInit();
-			break;
-		case r:
-			camera.orig[1] += MOVE_STEP;
-			camera.target[1] += MOVE_STEP;
-			reInit();
-			break;
-		case f:
-			camera.orig[1] -= MOVE_STEP;
-			camera.target[1] -= MOVE_STEP;
-			reInit();
-			break;
-		case four:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[0] -= 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case six:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[0] += 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case eight:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[2] -= 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case two:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[2] += 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case nine:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[1] += 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case three:
-			var sArray = scene.getSpheres();
-			sArray[currentSphere].p[1] -= 0.5 * MOVE_STEP;
-			reInitScene(); 
-			break;
-		case plus:
-			currentSphere = (currentSphere + 1) % sphereCount;
-			reInitScene();
-			break;
-		case minus:
-			currentSphere = (currentSphere + (sphereCount - 1)) % sphereCount;
-			reInitScene();
-			break;
-		default:
-			break;
+	case up:
+		var t = vec3.create(camera.target);
+		vec3.subtract(t, camera.orig, t);
+		t[1] = t[1] * Math.cos(-ROTATE_STEP) + t[2] * Math.sin(-ROTATE_STEP);
+		t[2] = -t[1] * Math.sin(-ROTATE_STEP) + t[2] * Math.cos(-ROTATE_STEP);
+		vec3.add(t, camera.orig, t);
+		camera.target = t;
+		reInit();
+		break;
+	case down:
+		var t = vec3.create(camera.target);
+		vec3.subtract(t, camera.orig, t);
+		t[1] = t[1] * Math.cos(ROTATE_STEP) + t[2] * Math.sin(ROTATE_STEP);
+		t[2] = -t[1] * Math.sin(ROTATE_STEP) + t[2] * Math.cos(ROTATE_STEP);
+		vec3.add(t, camera.orig, t);
+		camera.target = t;
+		reInit();
+		break;
+	case left: 
+		var t = vec3.create(camera.target);
+		vec3.subtract(t, camera.orig, t);
+		t[0] = t[0] * Math.cos(-ROTATE_STEP) - t[2] * Math.sin(-ROTATE_STEP);
+		t[2] = t[0] * Math.sin(-ROTATE_STEP) + t[2] * Math.cos(-ROTATE_STEP);
+		vec3.add(t, camera.orig, t);
+		camera.target = t;
+		reInit();
+		break;
+	case right: 
+		var t = vec3.create(camera.target);
+		vec3.subtract(t, camera.orig, t);
+		t[0] = t[0] * Math.cos(ROTATE_STEP) - t[2] * Math.sin(ROTATE_STEP);
+		t[2] = t[0] * Math.sin(ROTATE_STEP) + t[2] * Math.cos(ROTATE_STEP);
+		vec3.add(t, camera.orig, t);
+		camera.target = t;
+		reInit();
+		break;
+	case pgup:
+		camera.target[1] += MOVE_STEP;
+		reInit();
+		break;
+	case pgdown:
+		camera.target[1] -= MOVE_STEP;
+		reInit();
+		break;
+	case w:
+		var dir = vec3.create(camera.dir);
+		vec3.scale(dir, MOVE_STEP);
+		vec3.add(camera.orig, dir, camera.orig);
+		vec3.add(camera.target, dir, camera.target);
+		reInit();
+		break;
+	case a:
+		var dir = vec3.create(camera.x);
+		vec3.normalize(dir);
+		vec3.scale(dir, -MOVE_STEP);
+		vec3.add(camera.orig, dir, camera.orig);
+		vec3.add(camera.target, dir, camera.target);
+		reInit();
+		break;
+	case s:
+		var dir = vec3.create(camera.dir);
+		vec3.scale(dir, -MOVE_STEP);
+		vec3.add(camera.orig, dir, camera.orig);
+		vec3.add(camera.target, dir, camera.target);
+		reInit();
+		break;;
+	case d:
+		var dir = vec3.create(camera.x);
+		vec3.normalize(dir);
+		vec3.scale(dir, MOVE_STEP);
+		vec3.add(camera.orig, dir, camera.orig);
+		vec3.add(camera.target, dir, camera.target);
+		reInit();
+		break;
+	case r:
+		camera.orig[1] += MOVE_STEP;
+		camera.target[1] += MOVE_STEP;
+		reInit();
+		break;
+	case f:
+		camera.orig[1] -= MOVE_STEP;
+		camera.target[1] -= MOVE_STEP;
+		reInit();
+		break;
+	case four:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[0] -= 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case six:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[0] += 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case eight:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[2] -= 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case two:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[2] += 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case nine:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[1] += 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case three:
+		var sArray = scene.getSpheres();
+		sArray[currentSphere].p[1] -= 0.5 * MOVE_STEP;
+		reInitScene(); 
+		break;
+	case plus:
+		currentSphere = (currentSphere + 1) % sphereCount;
+		reInitScene();
+		break;
+	case minus:
+		currentSphere = (currentSphere + (sphereCount - 1)) % sphereCount;
+		reInitScene();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -366,7 +378,7 @@ function allocateBuffers() {
 	for(var i = 0; i < pixelCount * 4; i++) {
 		pixel8View[i] = i % 255;
 	}
-		
+	
 	var seeds = new Uint32Array(pixelCount * 2);
 	
 	for(var i = 0; i < pixelCount * 2; i++) {
@@ -389,56 +401,67 @@ function allocateBuffers() {
 	clQueue.enqueueWriteBuffer(seedBuffer, true, 0, bufSize, seeds, []);
 }
 
+function clDeviceQuery() {
+  var deviceList = [];
+  var platforms = (window.WebCL && WebCL.getPlatforms()) || [];
+  for (var p=0, i=0; p < platforms.length; p++) {
+    var plat = platforms[p];
+    var devices = plat.getDevices(WebCL.CL_DEVICE_TYPE_ALL);
+    for (var d=0; d < devices.length; d++, i++) {
+      deviceList[i] = { 'device' : devices[d], 
+                        'type' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_TYPE),
+                        'name' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_NAME),
+                        'version' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_VERSION),
+                        'vendor' : plat.getPlatformInfo(WebCL.CL_PLATFORM_VENDOR),
+                        'platform' : plat };
+    }
+  }
+  console.log(deviceList);
+  return deviceList;
+};
+
 function setupWebCL() {
 
-	if(window.WebCL == undefined) {
-		alert("Your browser doesn't support WebCL");
+  var deviceList = clDeviceQuery();
+
+  if (deviceList.length === 0) {
+		alert("Unfortunately your browser/system doesn't support WebCL.");
 		return false;
 	}
 
-	var platforms = [];
-	var devices = [];
-
-	try {
-		platforms = WebCL.getPlatformIDs();
-
-		var devicelist = "";
-
-		for(var i in platforms) {
-			devices = devices.concat(platforms[i].getDeviceIDs(WebCL.CL_DEVICE_TYPE_ALL));
-		}
-
-		for(var i in devices) {
-			devicelist += "<option value=" + i + ">" + devices[i].getDeviceInfo(WebCL.CL_DEVICE_NAME) + "</option>\n";
+  try {
+    var htmlDeviceList = "";
+		for(var i in deviceList) {
+			htmlDeviceList += "<option value=" + i + ">" + deviceList[i].vendor + ": " + deviceList[i].name + "</option>\n";
 		}
 
 		var deviceselect = document.getElementById("devices");
-		deviceselect.innerHTML = devicelist;
+		deviceselect.innerHTML = htmlDeviceList;
 		deviceselect.selectedIndex = selected;
-		selectedPlatform = platforms[selected];
-		cl = WebCL.createContextFromType([WebCL.CL_CONTEXT_PLATFORM, selectedPlatform], WebCL.CL_DEVICE_TYPE_DEFAULT);
-		devices = cl.getContextInfo(WebCL.CL_CONTEXT_DEVICES);
-		clQueue = cl.createCommandQueue(devices[0], 0);
 
+    var selectedDevice = deviceList[selected].device;
+    var selectedPlatform = deviceList[selected].platform;
+    cl = WebCL.createContext([WebCL.CL_CONTEXT_PLATFORM, selectedPlatform], [selectedDevice]);
+		clQueue = cl.createCommandQueue(selectedDevice, null);
 		allocateBuffers();
 	} catch(err) {
 		alert("Error initializing WebCL");
 	}
 
 	try {
-		// Kernel init
-		clSrc = document.getElementById("clSmallptGPU").text;
+		clSrc = xhrLoad("rendering_kernel.cl");
+    //document.getElementById("clSmallptGPU").text;
 		clProgram = cl.createProgramWithSource(clSrc);
-
-		clProgram.buildProgram([devices[0]], "-cl-fast-relaxed-math");
+		clProgram.buildProgram([selectedDevice], "-cl-fast-relaxed-math");
 	} catch(e) {
-		alert("Failed to build WebCL program. Error " + clProgram.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_STATUS) + ":  " + clProgram.getProgramBuildInfo(devices[selected], WebCL.CL_PROGRAM_BUILD_LOG));
+		alert("Failed to build WebCL program. Error " + 
+          clProgram.getProgramBuildInfo(selectedDevice, WebCL.CL_PROGRAM_BUILD_STATUS) + ":  " + 
+          clProgram.getProgramBuildInfo(selectedDevice, WebCL.CL_PROGRAM_BUILD_LOG));
 	}
-
 	
 	clKernel = clProgram.createKernel("RadianceGPU");
 	
-	wgSize = clKernel.getKernelWorkGroupInfo(devices[0], WebCL.CL_KERNEL_WORK_GROUP_SIZE);
+	wgSize = clKernel.getKernelWorkGroupInfo(selectedDevice, WebCL.CL_KERNEL_WORK_GROUP_SIZE);
 }
 
 function executeKernel() {
