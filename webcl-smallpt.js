@@ -19,7 +19,7 @@ var sphereCount;
 var pixelCount;
 var currentSample = 0;
 var testarray;
-var console;
+var htmlConsole;
 var spheres = [];
 var currentSphere = 0;
 var camera;
@@ -50,7 +50,7 @@ requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimati
 var start = window.mozAnimationStartTime;  // Only supported in FF. Other browsers can use something like Date.now(). 
 
 function webclsmallpt() {
-	console = document.getElementById("console");
+	htmlConsole = document.getElementById("console");
 	canvas = document.getElementById("canvas");
     canvasContext = canvas.getContext("2d");
     
@@ -77,7 +77,7 @@ function step(timestamp) {
 	if(running == true) {
 		jsTime = Date.now() - prevTime - clTime - clMemTime - elapsedTime;
 		prevTime = Date.now();
-		console.innerHTML = "WebCL (ms): " + clTime + "<br>WebCL memory transfer (ms): " + clMemTime + "<br>JS (ms): " + jsTime;
+		htmlConsole.innerHTML = "WebCL (ms): " + clTime + "<br>WebCL memory transfer (ms): " + clMemTime + "<br>JS (ms): " + jsTime;
 		clTime = 0;
 		jsTime = 0;
 		clMemTime = 0;
@@ -444,8 +444,8 @@ function setupWebCL() {
 function executeKernel() {
 	var globalThreads = canvas.width * canvas.height;
 	
-	if(globalThreads % wgSize != 0) {
-		globalThreads = (globalThreads / wgSize + 1) * wgSize;
+	if(globalThreads % wgSize !== 0) {
+		globalThreads = (Math.floor(globalThreads / wgSize) + 1) * wgSize;
 	}
 	
 	var localThreads = wgSize;
@@ -467,7 +467,7 @@ function executeKernel() {
 		clTime += Date.now() - start;
 	}
 	catch(e) {
-		console.innerHTML = e;
+		htmlConsole.innerHTML = e;
 	}
 }
 
@@ -505,7 +505,7 @@ function updateRendering() {
 	var samples = currentSample - startSampleCount;
 	var sampleSec = samples * canvas.height * canvas.width / elapsedTime;
 	
-	console.innerHTML += "<br>Rendering time " + elapsedTime + " ms (pass " + currentSample + ")<br>Sample/sec " + sampleSec.toFixed(2) + "K\n";
+	htmlConsole.innerHTML += "<br>Rendering time " + elapsedTime + " ms (pass " + currentSample + ")<br>Sample/sec " + sampleSec.toFixed(2) + "K\n";
 	
 	drawPixels();
 } 
