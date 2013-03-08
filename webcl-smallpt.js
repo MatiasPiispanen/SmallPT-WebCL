@@ -408,12 +408,15 @@ function clDeviceQuery() {
     var plat = platforms[p];
     var devices = plat.getDevices(WebCL.CL_DEVICE_TYPE_ALL);
     for (var d=0; d < devices.length; d++, i++) {
-      deviceList[i] = { 'device' : devices[d], 
-                        'type' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_TYPE),
-                        'name' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_NAME),
-                        'version' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_VERSION),
-                        'vendor' : plat.getPlatformInfo(WebCL.CL_PLATFORM_VENDOR),
-                        'platform' : plat };
+      if (devices[d].getDeviceInfo(WebCL.CL_DEVICE_AVAILABLE) === true) {
+        var availableDevice = { 'device' : devices[d], 
+                                'type' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_TYPE),
+                                'name' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_NAME),
+                                'version' : devices[d].getDeviceInfo(WebCL.CL_DEVICE_VERSION),
+                                'vendor' : plat.getPlatformInfo(WebCL.CL_PLATFORM_VENDOR),
+                                'platform' : plat };
+        deviceList.push(availableDevice);
+      }
     }
   }
   console.log(deviceList);
